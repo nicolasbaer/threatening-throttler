@@ -31,14 +31,12 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	if !allow {
-		http.Error(rw, "Come back later",
-			http.StatusInternalServerError)
+		fmt.Fprintln(rw, "<!DOCTYPE html><html><head></head><body><h1>access denied</h1></body></html>")
 		return
 	}
 
 	// hand over to Reverse Proxy
 	proxy.ServeHTTP(rw, req)
-	proxy.Transport
 
 }
 
@@ -51,7 +49,6 @@ func main() {
 	u, _ := url.Parse("http://localhost:8081")
 
 	proxy = httputil.NewSingleHostReverseProxy(u)
-	proxy.Transport = OUR AWESOME http.DefaultTransport
 
 	http.HandleFunc("/", http.HandlerFunc(throttelHandler))
 	log.Fatal(http.ListenAndServe(localPort, nil))

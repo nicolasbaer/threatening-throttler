@@ -1,4 +1,4 @@
-nablePlugins(GatlingPlugin)
+enablePlugins(GatlingPlugin)
 
 scalaVersion := "2.11.8"
 
