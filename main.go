@@ -38,6 +38,7 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// hand over to Reverse Proxy
 	proxy.ServeHTTP(rw, req)
+	proxy.Transport
 
 }
 
@@ -47,9 +48,10 @@ func main() {
 		fmt.Println("This is Threatening-Throttler version", version)
 	}
 
-	u, _ := url.Parse("http://www.unic.com")
+	u, _ := url.Parse("http://localhost:8081")
 
 	proxy = httputil.NewSingleHostReverseProxy(u)
+	proxy.Transport = OUR AWESOME http.DefaultTransport
 
 	http.HandleFunc("/", http.HandlerFunc(throttelHandler))
 	log.Fatal(http.ListenAndServe(localPort, nil))
