@@ -20,6 +20,7 @@ var (
 )
 
 var proxy *httputil.ReverseProxy
+var tt *ThreteningThrottler
 
 func init() {
 	flag.BoolVar(&verbose, "verbose", true, "verbose mode")
@@ -44,13 +45,13 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 		id = cookie.Value
 	}
 
-	allow, err := ThrottleThreatening(req, id)
+	allow, err := tt.ThrottleThreatening(req, id)
 	if err != nil {
 		return
 	}
 
 	if !allow {
-		fmt.Fprintln(rw, "<!DOCTYPE html><html><head></head><body><h1>access denied</h1></body></html>")
+		http.Error(rw, "Server overload", 503)
 		return
 	}
 
@@ -64,10 +65,12 @@ func main() {
 		fmt.Println("This is Threatening-Throttler version", version)
 	}
 
-	u, _ := url.Parse("http://nginx.org/")
+	u, _ := url.Parse("http://localhost:8081/")
 
 	proxy = httputil.NewSingleHostReverseProxy(u)
 	proxy.Transport = ItchyTripper{u}
+
+	tt = NewThreteningThrottler(1000, 30)
 
 	http.HandleFunc("/", http.HandlerFunc(throttelHandler))
 	log.Fatal(http.ListenAndServe(localPort, nil))

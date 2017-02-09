@@ -13,11 +13,13 @@ class StressTest extends Simulation {
 
   setUp(
     scenario("most-important")
-      .exec(http("proxy").get("/proxy"))
-      .exec(http("proxy").get("/proxy"))
-      .exec(http("proxy").get("/proxy"))
-      .exec(http("proxy").get("/proxy"))
-      .exec(http("proxy").get("/proxy"))
-      .inject(rampUsersPerSec(10) to(400) during(3 minutes)).protocols(httpConf)
+      .exec(http("proxy").get("/"))
+      .pause(5,12)
+      .exec(http("proxy").get("/"))
+      .pause(5,12)
+      .exec(http("proxy").get("/"))
+      .pause(5,12)
+      .exec(http("proxy").get("/"))
+      .inject(rampUsersPerSec(10) to(200) during(2 minutes)).protocols(httpConf)
   )
 }
