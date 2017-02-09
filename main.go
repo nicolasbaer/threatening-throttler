@@ -2,6 +2,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"flag"
 	"fmt"
 	"log"
@@ -11,6 +12,7 @@ import (
 )
 
 const version = "0.0.1"
+const cookieName = "threatening-cookie"
 
 var (
 	verbose   bool   // -verbose flag
@@ -25,7 +27,23 @@ func init() {
 }
 
 func throttelHandler(rw http.ResponseWriter, req *http.Request) {
-	allow, err := ThrottleRandom(req)
+
+	cookie, err := req.Cookie(cookieName)
+	var id string
+	if err == nil {
+		b := make([]byte, 16)
+		_, err := rand.Read(b)
+		if err != nil {
+			fmt.Println("Error :( ", err)
+			return
+		}
+
+		id = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+	} else {
+		id = cookie.Value
+	}
+
+	allow, err := ThrottleThreatening(req, id)
 	if err != nil {
 		return
 	}
@@ -37,7 +55,6 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// hand over to Reverse Proxy
 	proxy.ServeHTTP(rw, req)
-
 }
 
 func main() {
