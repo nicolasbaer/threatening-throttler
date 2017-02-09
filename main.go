@@ -46,9 +46,10 @@ func main() {
 		fmt.Println("This is Threatening-Throttler version", version)
 	}
 
-	u, _ := url.Parse("http://localhost:8081")
+	u, _ := url.Parse("http://nginx.org/")
 
 	proxy = httputil.NewSingleHostReverseProxy(u)
+	proxy.Transport = ItchyTripper{u}
 
 	http.HandleFunc("/", http.HandlerFunc(throttelHandler))
 	log.Fatal(http.ListenAndServe(localPort, nil))
