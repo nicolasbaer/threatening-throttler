@@ -30,7 +30,7 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 
 	cookie, err := req.Cookie(cookieName)
 	var id string
-	if err == nil {
+	if err != nil {
 		b := make([]byte, 16)
 		_, err := rand.Read(b)
 		if err != nil {
@@ -39,6 +39,7 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		id = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+		http.SetCookie(rw, &http.Cookie{Name: cookieName, Value: id})
 	} else {
 		id = cookie.Value
 	}
