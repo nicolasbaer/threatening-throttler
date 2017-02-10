@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"time"
 )
 
 const version = "0.0.1"
@@ -33,12 +34,7 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 	var id string
 	if err != nil {
 		b := make([]byte, 16)
-		_, err := rand.Read(b)
-		if err != nil {
-			fmt.Println("Error :( ", err)
-			return
-		}
-
+		rand.Read(b)
 		id = fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 		http.SetCookie(rw, &http.Cookie{Name: cookieName, Value: id})
 	} else {
@@ -57,6 +53,7 @@ func throttelHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// hand over to Reverse Proxy
 	proxy.ServeHTTP(rw, req)
+
 }
 
 func main() {
@@ -67,8 +64,11 @@ func main() {
 
 	u, _ := url.Parse("http://localhost:8081/")
 
+	client := http.Client{
+		Timeout: time.Second * 10,
+	}
 	proxy = httputil.NewSingleHostReverseProxy(u)
-	proxy.Transport = ItchyTripper{u}
+	proxy.Transport = ItchyTripper{u, &client}
 
 	tt = NewThreteningThrottler(1000, 30)
 
