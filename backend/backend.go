@@ -6,7 +6,7 @@ import (
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Oohhm goa Ooohm %s", "test")
+	fmt.Fprintf(w, "\u0950 goa \u0950", "test")
 	r.Body.Close()
 }
 
