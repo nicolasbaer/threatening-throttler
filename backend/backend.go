@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -11,6 +12,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8081", nil)
+	backend := &http.Server{
+		Addr:         ":8081",
+		Handler:      http.HandlerFunc(handler),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	backend.SetKeepAlivesEnabled(false)
+	backend.ListenAndServe()
+
 }
